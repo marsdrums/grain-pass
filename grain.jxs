@@ -177,6 +177,8 @@ vec2 coordRot(in vec2 tc, in float angle)
 
 void main(void) {
 
+	uint seed = uint(jit_in.texcoord.x*42282) + uint(jit_in.texcoord.y*11433) + uint(frame*593) + uint(441);
+
 	vec3 rotOffset = vec3(1.425,3.892,5.835); //rotation offset values	
 	vec2 rotCoordsR = coordRot(jit_in.normUV, float(frame) + rotOffset.x);
 	vec2 grain_scale = texDim / grain_size;

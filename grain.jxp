@@ -1,7 +1,7 @@
 <jitterpass>
     <pass name="grain">
 
-        <bind name="grain_size" param="grain_size" default="3.0" />
+        <bind name="grain_size" param="grain_size" default="4.0" />
         <bind name="grain_amount" param="grain_amount" default="0.5" />
         <bind name="colored" param="colored" default="1" />
         <bind name="luma_amount" param="luma_amount" default="1.0" />
