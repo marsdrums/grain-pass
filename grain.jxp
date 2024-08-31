@@ -1,11 +1,10 @@
 <jitterpass>
     <pass name="grain">
-
         <bind name="grain_size" param="grain_size" default="4.0" />
-        <bind name="grain_amount" param="grain_amount" default="0.5" />
+        <bind name="grain_amount" param="grain_amount" default="0.25" />
         <bind name="colored" param="colored" default="1" />
         <bind name="luma_amount" param="luma_amount" default="1.0" />
-        <bind name="color_tint" param="color_tint" default="0.6" />
+        <bind name="color_tint" param="color_tint" default="0.7" />
         <subpass file="grain.jxs">
             <input source="COLOR" />
         </subpass>

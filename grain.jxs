@@ -1,6 +1,8 @@
 <jittershader name="default">
 	<description>Default Slab </description>
 	<param name="tex0" type="int" default="0" />
+	<param name="noiseTex" type="int" default="1" />
+	<texture file="noise_tex.png" type="float16" unit="1" rectangle="0" filter="none none" wrap="repeat repeat"/>	
 	<param name="modelViewProjectionMatrix" type="mat4" state="MODELVIEW_PROJECTION_MATRIX" />
 	<param name="textureMatrix0" type="mat4" state="TEXTURE0_MATRIX" />
 	<param name="position" type="vec3" state="POSITION" />
@@ -16,6 +18,7 @@
 
 	<language name="glsl" version="1.5">
 		<bind param="tex0" program="fp" />
+		<bind param="noiseTex" program="fp" />
 		<bind param="modelViewProjectionMatrix" program="vp" />
 		<bind param="textureMatrix0" program="vp" />
 		<bind param="position" program="vp" />
@@ -61,13 +64,13 @@ in jit_PerVertex {
 layout (location = 0) out vec4 outColor;
 
 uniform samplerJit0 tex0;
+uniform sampler2D noiseTex;
 uniform int frame, colored;
 uniform vec2 texDim;
 uniform float grain_amount, color_tint, grain_size, luma_amount;
 
 #define OCTAVES 6.
-#define PI 3.14159265359
-#define TWOPI 6.28318530718 
+#define PI 3.141592653589793238462643383279
 
 uint wang_hash(inout uint seed){
 
@@ -91,9 +94,8 @@ vec4 RandomVec401(inout uint seed) {
 }
 
 //a random texture generator, but you can also use a pre-computed perturbation texture
-vec4 rnm(in vec2 tc) 
+vec4 rnm(in vec2 tc, inout uint seed) 
 {
-	uint seed = uint(jit_in.texcoord.x*3882) + uint(jit_in.texcoord.y*2933) + uint(frame*119) + uint(992);
     return RandomVec401(seed)*2 - 1;
 }
 
@@ -103,59 +105,53 @@ float fade(in float t) {
 
 float pnoise3D(in vec3 p)
 {
-
-    vec3 pi = 0.00390625*floor(p);
-    pi = vec3(pi.x+0.001953125, pi.y+0.001953125, pi.z+0.001953125);
+	float permTexUnit = 1.0/512;			// Perm texture texel-size
+	float permTexUnitHalf = 0.5/512;		// Half perm texture texel-size
+    vec3 pi = permTexUnit*floor(p)+permTexUnitHalf;
+    //pi = vec3(pi.x+0.001953125, pi.y+0.001953125, pi.z+0.001953125);
     vec3 pf = fract(p);     // Fractional part for interpolation
+   	//vec3 pi = floor(p);// - pf;
 
 
-    // Noise contributions from (x=0, y=0), z=0 and z=1
-    float perm00 = rnm(pi.xy).a ;
-    vec3 grad000 = rnm(vec2(perm00, pi.z)).rgb * 4.0;
-    grad000 = vec3(grad000.x - 1.0, grad000.y - 1.0, grad000.z - 1.0);
-    float n000 = dot(grad000, pf);
-    vec3 grad001 = rnm(vec2(perm00, pi.z + 0.00390625)).rgb * 4.0;
-    grad001 = vec3(grad001.x - 1.0, grad001.y - 1.0, grad001.z - 1.0);
-    float n001 = dot(grad001, pf - vec3(0.0, 0.0, 1.0));
+	// Noise contributions from (x=0, y=0), z=0 and z=1
+	float perm00 = texture(noiseTex, pi.xy).a ;
+	vec3  grad000 = texture(noiseTex, vec2(perm00, pi.z)).rgb * 4.0 - 1.0;
+	float n000 = dot(grad000, pf);
+	vec3  grad001 = texture(noiseTex, vec2(perm00, pi.z + permTexUnit)).rgb * 4.0 - 1.0;
+	float n001 = dot(grad001, pf - vec3(0.0, 0.0, 1.0));
 
-    // Noise contributions from (x=0, y=1), z=0 and z=1
-    float perm01 = rnm(pi.xy + vec2(0.0, 0.00390625)).a ;
-    vec3 grad010 = rnm(vec2(perm01, pi.z)).rgb * 4.0;
-    grad010 = vec3(grad010.x - 1.0, grad010.y - 1.0, grad010.z - 1.0);
-    float n010 = dot(grad010, pf - vec3(0.0, 1.0, 0.0));
-    vec3 grad011 = rnm(vec2(perm01, pi.z + 0.00390625)).rgb * 4.0;
-    grad011 = vec3(grad011.x - 1.0, grad011.y - 1.0, grad011.z - 1.0);
-    float n011 = dot(grad011, pf - vec3(0.0, 1.0, 1.0));
+	// Noise contributions from (x=0, y=1), z=0 and z=1
+	float perm01 = texture(noiseTex, pi.xy + vec2(0.0, permTexUnit)).a ;
+	vec3  grad010 = texture(noiseTex, vec2(perm01, pi.z)).rgb * 4.0 - 1.0;
+	float n010 = dot(grad010, pf - vec3(0.0, 1.0, 0.0));
+	vec3  grad011 = texture(noiseTex, vec2(perm01, pi.z + permTexUnit)).rgb * 4.0 - 1.0;
+	float n011 = dot(grad011, pf - vec3(0.0, 1.0, 1.0));
 
-    // Noise contributions from (x=1, y=0), z=0 and z=1
-    float perm10 = rnm(pi.xy + vec2(0.00390625, 0.0)).a ;
-    vec3  grad100 = rnm(vec2(perm10, pi.z)).rgb * 4.0;
-    grad100 = vec3(grad100.x - 1.0, grad100.y - 1.0, grad100.z - 1.0);
-    float n100 = dot(grad100, pf - vec3(1.0, 0.0, 0.0));
-    vec3  grad101 = rnm(vec2(perm10, pi.z + 0.00390625)).rgb * 4.0;
-    grad101 = vec3(grad101.x - 1.0, grad101.y - 1.0, grad101.z - 1.0);
-    float n101 = dot(grad101, pf - vec3(1.0, 0.0, 1.0));
+	// Noise contributions from (x=1, y=0), z=0 and z=1
+	float perm10 = texture(noiseTex, pi.xy + vec2(permTexUnit, 0.0)).a ;
+	vec3  grad100 = texture(noiseTex, vec2(perm10, pi.z)).rgb * 4.0 - 1.0;
+	float n100 = dot(grad100, pf - vec3(1.0, 0.0, 0.0));
+	vec3  grad101 = texture(noiseTex, vec2(perm10, pi.z + permTexUnit)).rgb * 4.0 - 1.0;
+	float n101 = dot(grad101, pf - vec3(1.0, 0.0, 1.0));
 
-    // Noise contributions from (x=1, y=1), z=0 and z=1
-    float perm11 = rnm(pi.xy + vec2(0.00390625, 0.00390625)).a ;
-    vec3  grad110 = rnm(vec2(perm11, pi.z)).rgb * 4.0;
-    grad110 = vec3(grad110.x - 1.0, grad110.y - 1.0, grad110.z - 1.0);
-    float n110 = dot(grad110, pf - vec3(1.0, 1.0, 0.0));
-    vec3  grad111 = rnm(vec2(perm11, pi.z + 0.00390625)).rgb * 4.0;
-    grad111 = vec3(grad111.x - 1.0, grad111.y - 1.0, grad111.z - 1.0);
-    float n111 = dot(grad111, pf - vec3(1.0, 1.0, 1.0));
+	// Noise contributions from (x=1, y=1), z=0 and z=1
+	float perm11 = texture(noiseTex, pi.xy + vec2(permTexUnit, permTexUnit)).a ;
+	vec3  grad110 = texture(noiseTex, vec2(perm11, pi.z)).rgb * 4.0 - 1.0;
+	float n110 = dot(grad110, pf - vec3(1.0, 1.0, 0.0));
+	vec3  grad111 = texture(noiseTex, vec2(perm11, pi.z + permTexUnit)).rgb * 4.0 - 1.0;
+	float n111 = dot(grad111, pf - vec3(1.0, 1.0, 1.0));
 
-    // Blend contributions along x
-    vec4 n_x = mix(vec4(n000, n001, n010, n011), vec4(n100, n101, n110, n111), fade(pf.x));
+	// Blend contributions along x
+	vec4 n_x = mix(vec4(n000, n001, n010, n011), vec4(n100, n101, n110, n111), fade(pf.x));
 
-    // Blend contributions along y
-    vec2 n_xy = mix(n_x.xy, n_x.zw, fade(pf.y));
+	// Blend contributions along y
+	vec2 n_xy = mix(n_x.xy, n_x.zw, fade(pf.y));
 
-    // Blend contributions along z
-    float n_xyz = mix(n_xy.x, n_xy.y, fade(pf.z));
+	// Blend contributions along z
+	float n_xyz = mix(n_xy.x, n_xy.y, fade(pf.z));
 
-    // We're done, return the final noise value.
-    return n_xyz;
+	// We're done, return the final noise value.
+	return n_xyz;
 }
 
 
@@ -167,9 +163,9 @@ vec2 coordRot(in vec2 tc, in float angle)
 	float sin_angle = sin(angle);
 	float cos_angle = cos(angle);
 	tc = tc*2 - 1;
-	tc.x *= aspect;
-	float rotX = (tc.x*cos_angle) - (tc.y*sin_angle);
-	float rotY = (tc.y*cos_angle) + (tc.x*sin_angle);
+	//tc.x *= aspect;
+	float rotX = (tc.x*cos_angle)*aspect - (tc.y*sin_angle);
+	float rotY = (tc.y*cos_angle) + (tc.x*sin_angle)*aspect;
 	rotX = ((rotX/aspect)*0.5+0.5);
 	rotY = rotY*0.5+0.5;
 	return vec2(rotX,rotY);
@@ -177,17 +173,26 @@ vec2 coordRot(in vec2 tc, in float angle)
 
 void main(void) {
 
-	uint seed = uint(jit_in.texcoord.x*42282) + uint(jit_in.texcoord.y*11433) + uint(frame*593) + uint(441);
+	vec2 center = jit_in.normUV+PI;
+	const float phi = 1.6180339887498948482045868343656381;
+	//const float phi2 = fract(phi*2);
+	//const float phi3 = fract(phi2*3);
+	float f_frame = float(frame);
+	//vec3 rotOffset = vec3(1.425,3.892,5.835) + float(frame);//vec3(phi, phi2, phi3) + float(frame); //rotation offset values	
+	vec3 rotOffset = 2*PI*vec3( 	fract(phi*1*f_frame), 
+									fract(phi*2*f_frame), 
+									fract(phi*3*f_frame) 
+								); //rotation offset values	
 
-	vec3 rotOffset = vec3(1.425,3.892,5.835); //rotation offset values	
-	vec2 rotCoordsR = coordRot(jit_in.normUV, float(frame) + rotOffset.x);
+	vec2 rotCoordsR = coordRot(center, rotOffset.x);
+
 	vec2 grain_scale = texDim / grain_size;
 	vec3 noise = vec3(pnoise3D(vec3(rotCoordsR * grain_scale,0.0)));
 
 	if (colored == 1)
 	{
-		vec2 rotCoordsG = coordRot(jit_in.normUV, float(frame) + rotOffset.y);
-		vec2 rotCoordsB = coordRot(jit_in.normUV, float(frame) + rotOffset.z);
+		vec2 rotCoordsG = coordRot(center, rotOffset.y);
+		vec2 rotCoordsB = coordRot(center, rotOffset.z);
 		noise.g = mix(noise.r,pnoise3D(vec3(rotCoordsG * grain_scale,1.0)),color_tint);
 		noise.b = mix(noise.r,pnoise3D(vec3(rotCoordsB * grain_scale,2.0)),color_tint);
 	}	
@@ -199,8 +204,10 @@ void main(void) {
 	float luminance = mix(0.0,dot(col, vec3(0.299,0.587,0.114)),luma_amount);
 	float lum = smoothstep(0.2,0.0,luminance);
 	lum += luminance;
+	lum *= lum;
+	lum *= lum;
 
-	noise = mix(noise,vec3(0.0),pow(lum,4.0));
+	noise = mix(noise,vec3(0.0),lum);
 	col = col+noise*grain_amount;
    
 	outColor =  vec4(col,1.0);

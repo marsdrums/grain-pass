@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 59.0, 144.0, 1210.0, 795.0 ],
+		"rect" : [ 111.0, 283.0, 1210.0, 795.0 ],
 		"bglocked" : 0,
 		"openinpresentation" : 0,
 		"default_fontsize" : 12.0,
@@ -39,6 +39,18 @@
 		"subpatcher_template" : "",
 		"assistshowspatchername" : 0,
 		"boxes" : [ 			{
+				"box" : 				{
+					"id" : "obj-34",
+					"maxclass" : "newobj",
+					"numinlets" : 1,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"patching_rect" : [ 269.0, 257.0, 70.0, 22.0 ],
+					"text" : "loadmess 1"
+				}
+
+			}
+, 			{
 				"box" : 				{
 					"id" : "obj-25",
 					"maxclass" : "newobj",
@@ -127,7 +139,8 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "int" ],
 					"parameter_enable" : 0,
-					"patching_rect" : [ 269.0, 294.0, 24.0, 24.0 ]
+					"patching_rect" : [ 269.0, 294.0, 24.0, 24.0 ],
+					"svg" : ""
 				}
 
 			}
@@ -165,7 +178,8 @@
 					"numoutlets" : 1,
 					"outlettype" : [ "int" ],
 					"parameter_enable" : 0,
-					"patching_rect" : [ 34.0, 45.0, 24.0, 24.0 ]
+					"patching_rect" : [ 34.0, 45.0, 24.0, 24.0 ],
+					"svg" : ""
 				}
 
 			}
@@ -176,8 +190,8 @@
 					"numinlets" : 1,
 					"numoutlets" : 3,
 					"outlettype" : [ "jit_matrix", "bang", "" ],
-					"patching_rect" : [ 34.0, 82.0, 163.0, 22.0 ],
-					"text" : "jit.world grain-ctx @floating 1"
+					"patching_rect" : [ 34.0, 82.0, 375.0, 22.0 ],
+					"text" : "jit.world grain-ctx @floating 1 @displaylink 0 @fps 30 @size 960 540"
 				}
 
 			}
@@ -204,19 +218,6 @@
 					"outlettype" : [ "" ],
 					"parameter_enable" : 0,
 					"patching_rect" : [ 269.0, 333.0, 150.0, 22.0 ]
-				}
-
-			}
-, 			{
-				"box" : 				{
-					"attr" : "enable",
-					"id" : "obj-26",
-					"maxclass" : "attrui",
-					"numinlets" : 1,
-					"numoutlets" : 1,
-					"outlettype" : [ "" ],
-					"parameter_enable" : 0,
-					"patching_rect" : [ 57.0, 402.0, 150.0, 22.0 ]
 				}
 
 			}
@@ -258,15 +259,15 @@
 			}
 , 			{
 				"patchline" : 				{
-					"destination" : [ "obj-19", 0 ],
-					"source" : [ "obj-26", 0 ]
+					"destination" : [ "obj-1", 0 ],
+					"source" : [ "obj-3", 0 ]
 				}
 
 			}
 , 			{
 				"patchline" : 				{
-					"destination" : [ "obj-1", 0 ],
-					"source" : [ "obj-3", 0 ]
+					"destination" : [ "obj-18", 0 ],
+					"source" : [ "obj-34", 0 ]
 				}
 
 			}
@@ -292,7 +293,7 @@
 
 			}
  ],
-		"originid" : "pat-157",
+		"originid" : "pat-67",
 		"dependency_cache" : [  ],
 		"autosave" : 0
 	}
