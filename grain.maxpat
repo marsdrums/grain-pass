@@ -161,7 +161,7 @@
 					"numinlets" : 1,
 					"numoutlets" : 0,
 					"patching_rect" : [ 206.0, 271.0, 177.0, 20.0 ],
-					"text" : "this should be limited above 1.5"
+					"text" : "this should be limited above 2.3"
 				}
 
 			}
