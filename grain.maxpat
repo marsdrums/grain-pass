@@ -326,6 +326,19 @@
 				}
 
 			}
+, 			{
+				"box" : 				{
+					"attr" : "enable",
+					"id" : "obj-53",
+					"maxclass" : "attrui",
+					"numinlets" : 1,
+					"numoutlets" : 1,
+					"outlettype" : [ "" ],
+					"parameter_enable" : 0,
+					"patching_rect" : [ 19.0, 293.0, 132.0, 22.0 ]
+				}
+
+			}
  ],
 		"lines" : [ 			{
 				"patchline" : 				{
@@ -423,6 +436,13 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-19", 0 ],
+					"source" : [ "obj-53", 0 ]
+				}
+
+			}
+, 			{
+				"patchline" : 				{
+					"destination" : [ "obj-19", 0 ],
 					"source" : [ "obj-6", 0 ]
 				}
 
@@ -442,7 +462,7 @@
 
 			}
  ],
-		"originid" : "pat-110",
+		"originid" : "pat-128",
 		"dependency_cache" : [  ],
 		"autosave" : 0
 	}
