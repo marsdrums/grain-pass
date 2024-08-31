@@ -133,13 +133,12 @@
 , 			{
 				"box" : 				{
 					"id" : "obj-49",
-					"linecount" : 2,
 					"maxclass" : "newobj",
 					"numinlets" : 8,
 					"numoutlets" : 2,
 					"outlettype" : [ "", "" ],
-					"patching_rect" : [ 670.0, 250.0, 144.0, 35.0 ],
-					"text" : "jit.gl.pbr @tex_repeat 3. 3. @gamma_correction 0"
+					"patching_rect" : [ 670.0, 250.0, 175.0, 22.0 ],
+					"text" : "jit.gl.pbr @gamma_correction 0"
 				}
 
 			}
@@ -150,8 +149,8 @@
 					"numinlets" : 1,
 					"numoutlets" : 2,
 					"outlettype" : [ "jit_matrix", "" ],
-					"patching_rect" : [ 670.0, 328.0, 326.0, 22.0 ],
-					"text" : "jit.gl.gridshape node @shape torus @scale 0.5 @dim 40 40"
+					"patching_rect" : [ 670.0, 328.0, 325.0, 22.0 ],
+					"text" : "jit.gl.gridshape node @shape cube @scale 0.5 @dim 40 40"
 				}
 
 			}
@@ -462,7 +461,7 @@
 
 			}
  ],
-		"originid" : "pat-128",
+		"originid" : "pat-136",
 		"dependency_cache" : [  ],
 		"autosave" : 0
 	}
